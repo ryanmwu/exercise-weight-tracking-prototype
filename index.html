@@ -318,6 +318,54 @@ body { display:flex; justify-content:center; align-items:flex-start; min-height:
 .s-vol     { font-size:12px; color:var(--light); min-width:64px; text-align:right; font-weight:400; }
 
 /* ════════════════════════════════════
+   SCREEN — EXERCISE LIST
+════════════════════════════════════ */
+.search-wrap {
+  padding:10px 20px 8px;
+  position:relative;
+}
+.search-input {
+  width:100%; background:var(--bg-warm); border:none; outline:none;
+  border-radius:12px; padding:11px 16px 11px 40px;
+  font-family:inherit; font-size:14px; color:var(--text);
+  -webkit-appearance:none;
+}
+.search-input::placeholder { color:var(--light); }
+.search-icon {
+  position:absolute; left:32px; top:50%; transform:translateY(-50%);
+  pointer-events:none;
+}
+.filter-row {
+  display:flex; gap:7px; padding:4px 20px 12px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.filter-row::-webkit-scrollbar { display:none; }
+.filter-pill {
+  padding:6px 14px; border-radius:100px; font-size:12px; font-weight:500;
+  white-space:nowrap; cursor:pointer; font-family:inherit; border:none;
+  background:var(--bg-warm); color:var(--muted); transition:all 0.14s; flex-shrink:0;
+}
+.filter-pill.active { background:var(--text); color:#fff; }
+
+.ex-list { padding:0 20px 24px; display:flex; flex-direction:column; gap:8px; }
+.el-card {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; background:var(--bg-warm); border-radius:14px;
+  cursor:pointer; transition:background 0.12s;
+}
+.el-card:active { background:var(--bg-warm-2); }
+.el-card.hidden { display:none; }
+.el-left { flex:1; }
+.el-name { font-size:15px; font-weight:500; color:var(--text); margin-bottom:4px; }
+.el-meta { display:flex; align-items:center; gap:8px; }
+.el-tag  { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--bg); background:var(--sage); border-radius:6px; padding:2px 7px; }
+.el-date { font-size:12px; color:var(--light); }
+.el-right { text-align:right; flex-shrink:0; margin-left:12px; }
+.el-weight { font-size:16px; font-weight:500; color:var(--text); letter-spacing:-0.3px; }
+.el-wlbl  { font-size:11px; color:var(--light); }
+.el-empty { text-align:center; padding:40px 0; color:var(--light); font-size:14px; display:none; }
+
+/* ════════════════════════════════════
    SCREEN 0 — WORKOUT DETAILS
 ════════════════════════════════════ */
 .wd-header { padding:4px 24px 16px; }
@@ -400,6 +448,120 @@ body { display:flex; justify-content:center; align-items:flex-start; min-height:
      SCREEN 0 — WORKOUT DETAILS
 ════════════════════════════════════ -->
 <!-- ════════════════════════════════════
+     SCREEN — EXERCISE LIST
+════════════════════════════════════ -->
+<div class="screen" id="screen-exercise-list">
+
+  <div class="sb">
+    <span class="sb-time">3:31</span>
+    <div class="sb-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--text)"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="16" height="12" viewBox="0 0 24 18" fill="none" stroke="var(--text)" stroke-width="2"><path d="M1.5 6.5C5.5 2.5 10.5 1 12 1s6.5 1.5 10.5 5.5"/><path d="M5 10.5c1.9-1.9 4.3-3 7-3s5.1 1.1 7 3"/><path d="M8.5 14.5C9.8 13.2 10.8 12 12 12s2.2 1.2 3.5 2.5"/><circle cx="12" cy="17" r="1" fill="var(--text)"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="var(--text)" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="var(--text)"/><path d="M23 4.5v3c.8-.4 1.3-1 1.3-1.5S23.8 4.9 23 4.5z" fill="var(--text)" opacity="0.4"/></svg>
+    </div>
+  </div>
+
+  <div class="nh">
+    <div class="back" onclick="goTo('profile')">
+      <svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L1 8.5l8 7.5"/></svg>
+    </div>
+    <span class="nh-title">Weight Tracking</span>
+    <div style="width:32px"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--light)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-input" type="text" placeholder="Search exercises…" oninput="filterExList()" id="ex-search">
+  </div>
+
+  <!-- Muscle group filters -->
+  <div class="filter-row" id="ex-filters">
+    <button class="filter-pill active" onclick="setExFilter(this,'all')">All</button>
+    <button class="filter-pill" onclick="setExFilter(this,'legs')">Legs</button>
+    <button class="filter-pill" onclick="setExFilter(this,'glutes')">Glutes</button>
+    <button class="filter-pill" onclick="setExFilter(this,'upper body')">Upper Body</button>
+    <button class="filter-pill" onclick="setExFilter(this,'core')">Core</button>
+  </div>
+
+  <!-- Exercise cards (sorted alphabetically) -->
+  <div class="ex-list" id="ex-list">
+    <div class="el-card" data-group="upper body" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Barbell Row</div>
+        <div class="el-meta"><span class="el-tag">Upper Body</span><span class="el-date">18 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">42.5 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="legs" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Bulgarian Split Squats</div>
+        <div class="el-meta"><span class="el-tag">Legs</span><span class="el-date">16 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">20 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="glutes" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Cable Kickbacks</div>
+        <div class="el-meta"><span class="el-tag">Glutes</span><span class="el-date">17 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">15 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="legs" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Dumbbell Lunges</div>
+        <div class="el-meta"><span class="el-tag">Legs</span><span class="el-date">15 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">12.5 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="legs" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Dumbbell RDL</div>
+        <div class="el-meta"><span class="el-tag">Legs</span><span class="el-date">13 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">27.5 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="legs" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Dumbbell Squats</div>
+        <div class="el-meta"><span class="el-tag">Legs</span><span class="el-date">14 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">35 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="glutes" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Hip Thrust</div>
+        <div class="el-meta"><span class="el-tag">Glutes</span><span class="el-date">14 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">60 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="legs" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Leg Press</div>
+        <div class="el-meta"><span class="el-tag">Legs</span><span class="el-date">13 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">80 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="upper body" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Seated Shoulder Press</div>
+        <div class="el-meta"><span class="el-tag">Upper Body</span><span class="el-date">11 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">17.5 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-card" data-group="core" onclick="progressBackTo='exercise-list';goTo('progress')">
+      <div class="el-left">
+        <div class="el-name">Weighted Cable Crunch</div>
+        <div class="el-meta"><span class="el-tag">Core</span><span class="el-date">10 Apr 2026</span></div>
+      </div>
+      <div class="el-right"><div class="el-weight">22.5 kg</div><div class="el-wlbl">Last logged</div></div>
+    </div>
+    <div class="el-empty" id="el-empty">No exercises found</div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════
      SCREEN — PROFILE
 ════════════════════════════════════ -->
 <div class="screen" id="screen-profile">
@@ -465,7 +627,7 @@ body { display:flex; justify-content:center; align-items:flex-start; min-height:
       <div class="pm-text"><div class="pm-title">Update My Macros</div><div class="pm-sub">Update your goal, restrictions and calories</div></div>
       <div class="pm-chev"><svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg></div>
     </div>
-    <div class="pm-item" onclick="goTo('progress')">
+    <div class="pm-item" onclick="goTo('exercise-list')">
       <div class="pm-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
       <div class="pm-text"><div class="pm-title">My Exercise Weight Tracking</div><div class="pm-sub">View and manage your logged weights</div></div>
       <div class="pm-chev"><svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg></div>
@@ -698,7 +860,7 @@ body { display:flex; justify-content:center; align-items:flex-start; min-height:
       <div class="wt-row">
         <div class="wt-lbl">Weight Tracking</div>
         <div class="wt-acts">
-          <span class="view-prog" onclick="goTo('progress')">View Progress</span>
+          <span class="view-prog" onclick="progressBackTo='exercise';goTo('progress')">View Progress</span>
           <div class="log-btn" onclick="openLog()">Log</div>
         </div>
       </div>
@@ -774,7 +936,7 @@ body { display:flex; justify-content:center; align-items:flex-start; min-height:
     </div>
   </div>
   <div class="nh">
-    <div class="back" onclick="goTo('exercise')">
+    <div class="back" onclick="goTo(progressBackTo)">
       <svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L1 8.5l8 7.5"/></svg>
     </div>
     <span class="nh-title">Progress</span>
@@ -955,6 +1117,7 @@ const HISTORY = [
   { date:'2026-04-14', sets:[{w:35,r:10},{w:37.5,r:10},{w:37.5,r:8}] },
 ];
 let st = {w:35, r:10, sets:[]};
+let progressBackTo = 'exercise';
 let activePd = '1M';
 let cur = 'exercise';
 
@@ -1098,6 +1261,31 @@ function renderSessions(){
 }
 function fmtFull(d){return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase();}
 function fmtMini(d){return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+/* ── Exercise list search & filter ── */
+let activeExFilter = 'all';
+function setExFilter(btn, group) {
+  activeExFilter = group;
+  document.querySelectorAll('#ex-filters .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyExList();
+}
+function filterExList() { applyExList(); }
+function applyExList() {
+  const q = document.getElementById('ex-search').value.toLowerCase();
+  const cards = document.querySelectorAll('#ex-list .el-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const name = card.querySelector('.el-name').textContent.toLowerCase();
+    const group = card.dataset.group;
+    const matchSearch = name.includes(q);
+    const matchFilter = activeExFilter === 'all' || group === activeExFilter;
+    const show = matchSearch && matchFilter;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('el-empty').style.display = visible === 0 ? 'block' : 'none';
+}
+
 function showToast(msg,isPR){
   document.querySelectorAll('.toast').forEach(t=>t.remove());
   const t=document.createElement('div');
